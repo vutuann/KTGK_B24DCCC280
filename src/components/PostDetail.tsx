@@ -1,73 +1,57 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Post } from '../types/post';
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 
-interface PostDetailProps {
-  posts: Post[];
-  onDelete: (id: number) => void;
+interface Post {
+  id: number;
+  title: string;
+  author: string;
+  content: string;
+  date: string;
+  category?: string;
+  thumbnail?: string;
 }
 
-const PostDetail: React.FC<PostDetailProps> = ({ posts, onDelete }) => {
+export default function PostDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const post = posts.find(p => p.id === Number(id));
+  const [post, setPost] = useState<Post | null>(null);
 
-  if (!post) {
-    return <div className="text-center py-16 text-red-500 text-xl">Bài viết không tồn tại!</div>;
-  }
+  useEffect(() => {
+    const posts: Post[] = JSON.parse(localStorage.getItem("posts") || "[]");
+    const found = posts.find((p) => p.id === Number(id));
+    setPost(found || null);
+  }, [id]);
+
+  if (!post) return <p>Bài viết không tồn tại.</p>;
 
   const handleDelete = () => {
-    if (window.confirm('Bạn có chắc muốn xóa bài viết này?')) {
-      onDelete(post.id);
-      navigate('/');
+    if (window.confirm("Bạn có chắc muốn xóa bài viết này?")) {
+      const posts: Post[] = JSON.parse(localStorage.getItem("posts") || "[]");
+      const updated = posts.filter((p) => p.id !== post.id);
+      localStorage.setItem("posts", JSON.stringify(updated));
+      navigate("/");
     }
   };
 
   return (
-    <article className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg">
-      <Link to="/" className="inline-block mb-6 text-blue-600 hover:underline font-medium">
-        ← Quay lại danh sách
-      </Link>
-
+    <div style={{ padding: "20px" }}>
+      <h2>{post.title}</h2>
       {post.thumbnail && (
         <img
           src={post.thumbnail}
           alt={post.title}
-          className="w-full h-80 object-cover rounded-lg shadow-md mb-8"
+          style={{ width: "400px", height: "200px", objectFit: "cover", marginBottom: "10px" }}
         />
       )}
-
-      <div className="space-y-4">
-        <h1 className="text-4xl font-bold text-gray-800">{post.title}</h1>
-
-        <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-          <span><strong>Tác giả:</strong> {post.author}</span>
-          <span><strong>Ngày đăng:</strong> {post.date}</span>
-          <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-            {post.category}
-          </span>
-        </div>
-
-        <div className="prose prose-lg max-w-none mt-8 text-gray-700 leading-relaxed">
-          <p>{post.content}</p>
-        </div>
-      </div>
-
-      <div className="mt-10 flex space-x-4">
-        <Link
-          to={`/posts/edit/${post.id}`}
-          className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition font-medium"
-        >
-          Chỉnh sửa
-        </Link>
-        <button
-          onClick={handleDelete}
-          className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium"
-        >
-          Xóa bài viết
-        </button>
-      </div>
-    </article>
+      <p>
+        <b>Tác giả:</b> {post.author} <br />
+        <b>Ngày đăng:</b> {post.date} <br />
+        <b>Thể loại:</b> {post.category || "Khác"}
+      </p>
+      <p>{post.content}</p>
+      <button onClick={() => navigate("/")}>Quay lại</button>{" "}
+      <button onClick={() => navigate(`/posts/edit/${post.id}`)}>Chỉnh sửa</button>{" "}
+      <button onClick={handleDelete}>Xóa bài viết</button>
+    </div>
   );
-};
-
-export default PostDetail;
+}
