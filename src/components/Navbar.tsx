@@ -1,24 +1,25 @@
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink } from "react-router-dom";
 
-const Navbar: React.FC = () => {
+export default function Navbar() {
   return (
-    <nav className="navbar">
-      <div className="container">
-        <Link to="/" className="logo">BlogHub</Link>
-        <div className="nav-links">
-          <NavLink
-            to="/"
-            className={({ isActive }) => isActive ? 'active' : ''}
-          >
-            Trang chủ
-          </NavLink>
-          <Link to="/create" className="btn-primary">
-            Viết bài mới
-          </Link>
-        </div>
-      </div>
+    <nav style={{ padding: "10px", background: "#f2f2f2" }}>
+      <NavLink
+        to="/"
+        style={({ isActive }) => ({
+          marginRight: "10px",
+          fontWeight: isActive ? "bold" : "normal",
+        })}
+      >
+        Trang chủ
+      </NavLink>
+      <NavLink
+        to="/create"
+        style={({ isActive }) => ({
+          fontWeight: isActive ? "bold" : "normal",
+        })}
+      >
+        Viết bài
+      </NavLink>
     </nav>
   );
-};
-
-export default Navbar;
+}
