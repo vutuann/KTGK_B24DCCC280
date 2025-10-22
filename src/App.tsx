@@ -7,7 +7,7 @@ import PostForm from './components/PostForm';
 import { initialPosts } from './data/initialPosts';
 import { Post } from './types/post';
 import { PostFormData } from './types/postForm';
-// ...existing code...
+
 
 function App() {
   const [posts, setPosts] = useState<Post[]>(initialPosts);
@@ -27,7 +27,7 @@ function App() {
 
   // chung handler cho PostForm: nhận cả create (PostFormData) và edit (Post)
   const handlePostFormSubmit = (data: Post | PostFormData) => {
-    // nếu có id => edit, ngược lại => tạo mới
+
     if ((data as Post).id !== undefined) {
       updatePost(data as Post);
     } else {
@@ -53,4 +53,3 @@ function App() {
 }
 
 export default App;
-// ...existing code...
