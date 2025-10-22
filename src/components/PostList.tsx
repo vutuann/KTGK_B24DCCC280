@@ -1,48 +1,32 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import PostCard from './PostCard';
-import { Post } from '../types/post';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import PostCard from "./PostCard";
 
-interface PostListProps {
-  posts: Post[];
-  onDelete: (id: number) => void;
-}
+export default function PostList() {
+  const [posts, setPosts] = useState<any[]>([]);
+  const navigate = useNavigate();
 
-const PostList: React.FC<PostListProps> = ({ posts, onDelete }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const filteredPosts = posts.filter(post =>
-    post.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const savedPosts = JSON.parse(localStorage.getItem("posts") || "[]");
+    setPosts(savedPosts);
+  }, []);
 
   return (
-    <div className="container">
-      <div className="search-group">
-        <h1 className="page-title">Tất cả bài viết ({filteredPosts.length})</h1>
-        <Link to="/create" className="btn-primary">Viết bài mới</Link>
+    <div style={{ padding: "20px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+        <h2>Danh sách bài viết ({posts.length})</h2>
+      
       </div>
 
-      <input
-        type="text"
-        placeholder="Tìm kiếm theo tiêu đề..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="search-input"
-      />
-
-      {filteredPosts.length === 0 ? (
-        <p style={{ textAlign: 'center', color: '#6b7280', margin: '3rem 0' }}>
-          Không tìm thấy bài viết nào.
-        </p>
+      {posts.length === 0 ? (
+        <p>Chưa có bài viết nào.</p>
       ) : (
-        <div className="grid">
-          {filteredPosts.map(post => (
-            <PostCard key={post.id} post={post} onDelete={onDelete} />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(500px, 1fr))", gap: "15px" }}>
+          {posts.map((post) => (
+            <PostCard key={post.id} post={post} />
           ))}
         </div>
       )}
     </div>
   );
-};
-
-export default PostList;
+}
