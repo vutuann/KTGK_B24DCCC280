@@ -1,4 +1,4 @@
-/* src/index.css */
+
 * {
   margin: 0;
   padding: 0;
@@ -12,14 +12,14 @@ body {
   line-height: 1.6;
 }
 
-/* Container */
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
 }
 
-/* Navbar */
+
 .navbar {
   background: linear-gradient(135deg, #1e40af, #3b82f6);
   color: white;
@@ -70,7 +70,7 @@ body {
   transform: translateY(-1px);
 }
 
-/* Page Title */
+
 .page-title {
   font-size: 2rem;
   font-weight: bold;
@@ -78,7 +78,7 @@ body {
   color: #1e293b;
 }
 
-/* Search & Button Group */
+
 .search-group {
   display: flex;
   justify-content: space-between;
@@ -104,14 +104,14 @@ body {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Grid */
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
 }
 
-/* Card */
+
 .card {
   background: white;
   border-radius: 12px;
@@ -207,7 +207,7 @@ body {
   background: #dc2626;
 }
 
-/* Form */
+
 .form-container {
   max-width: 800px;
   margin: 2rem auto;
@@ -367,7 +367,7 @@ body {
   background: #d97706;
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .search-group {
     flex-direction: column;
