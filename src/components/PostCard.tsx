@@ -1,41 +1,52 @@
-import { Link } from 'react-router-dom';
-import { Post } from '../types/post';
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 interface PostCardProps {
-  post: Post;
-  onDelete: (id: number) => void;
+  post: any;
+  onDelete?: (id: number) => void;
 }
 
 const PostCard: React.FC<PostCardProps> = ({ post, onDelete }) => {
-  const handleDelete = () => {
-    if (window.confirm('Bạn có chắc muốn xóa bài viết này?')) {
-      onDelete(post.id);
-    }
-  };
+  const navigate = useNavigate();
 
   return (
-    <div className="card">
-      <img
-        src={post.thumbnail || 'https://via.placeholder.com/300x180?text=No+Image'}
-        alt={post.title}
-      />
-      <div className="card-body">
-        <h3 className="card-title">{post.title}</h3>
-        <p className="card-text">{post.content.substring(0, 100)}...</p>
-        <div className="card-meta">
-          <span>{post.author}</span>
-          <span>{post.date}</span>
-        </div>
-        <div style={{ marginBottom: '0.75rem' }}>
-          <span className="tag">{post.category}</span>
-        </div>
-        <div className="card-actions">
-          <Link to={`/posts/${post.id}`} className="btn btn-read">
-            Đọc thêm
+    <div
+      style={{
+        border: "1px solid #ccc",
+        padding: "10px",
+        marginBottom: "10px",
+        borderRadius: "5px",
+        display: "flex",
+        gap: "10px",
+      }}
+    >
+      {post.thumbnail && (
+        <img
+          src={post.thumbnail}
+          alt={post.title}
+          style={{ width: "150px", height: "100px", objectFit: "cover", borderRadius: "5px" }}
+        />
+      )}
+      <div style={{ flex: 1 }}>
+        <h3>{post.title}</h3>
+        <p>
+          <b>Tác giả:</b> {post.author} <br />
+          <b>Ngày:</b> {post.date} <br />
+          <b>Thể loại:</b> {post.category || "Khác"}
+        </p>
+        <p>{post.content.slice(0, 100)}...</p>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <Link to={`/posts/${post.id}`}>
+            <button>Xem chi tiết</button>
           </Link>
-          <button onClick={handleDelete} className="btn btn-delete">
-            Xóa
-          </button>
+          {onDelete && (
+            <button
+              style={{ color: "red" }}
+              onClick={() => onDelete(post.id)}
+            >
+              Xóa
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -43,3 +54,4 @@ const PostCard: React.FC<PostCardProps> = ({ post, onDelete }) => {
 };
 
 export default PostCard;
+
