@@ -1,178 +1,93 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Post, Category } from '../types/post';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-interface PostFormProps {
-  posts?: Post[];
-  onSubmit: (post: Omit<Post, 'id'> | Post) => void;
-}
-
-const categories: Category[] = ['Công nghệ', 'Du lịch', 'Ẩm thực', 'Đời sống', 'Khác'];
-
-const PostForm: React.FC<PostFormProps> = ({ posts, onSubmit }) => {
-  const { id } = useParams<{ id: string }>();
+export default function PostForm({ mode }: { mode: "create" | "edit" }) {
   const navigate = useNavigate();
-  const isEdit = !!id;
-  const existing = isEdit && posts ? posts.find(p => p.id === Number(id)) : null;
+  const { id } = useParams<{ id: string }>();
 
-  const today = new Date().toISOString().split('T')[0];
-
-  const [title, setTitle] = useState('');
-  const [author, setAuthor] = useState('');
-  const [thumbnail, setThumbnail] = useState('');
-  const [content, setContent] = useState('');
-  const [category, setCategory] = useState<Category>('Công nghệ');
-  const [date] = useState(today);
-
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState("");
+  const [content, setContent] = useState("");
+  const [category, setCategory] = useState("Khác");
+  const [thumbnail, setThumbnail] = useState("");
 
   useEffect(() => {
-    if (existing) {
-      setTitle(existing.title);
-      setAuthor(existing.author);
-      setThumbnail(existing.thumbnail || '');
-      setContent(existing.content);
-      setCategory(existing.category);
+    if (mode === "edit" && id) {
+      const posts = JSON.parse(localStorage.getItem("posts") || "[]");
+      const post = posts.find((p: any) => p.id === Number(id));
+      if (post) {
+        setTitle(post.title);
+        setAuthor(post.author);
+        setContent(post.content);
+        setCategory(post.category || "Khác");
+        setThumbnail(post.thumbnail || "");
+      }
     }
-  }, [existing]);
-
-  const validate = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    if (!title.trim()) newErrors.title = 'Tiêu đề là bắt buộc';
-    else if (title.trim().length < 10) newErrors.title = 'Tiêu đề phải có ít nhất 10 ký tự';
-
-    if (!author.trim()) newErrors.author = 'Tác giả là bắt buộc';
-    else if (author.trim().length < 3) newErrors.author = 'Tác giả phải có ít nhất 3 ký tự';
-
-    if (!content.trim()) newErrors.content = 'Nội dung là bắt buộc';
-    else if (content.trim().length < 50) newErrors.content = 'Nội dung phải có ít nhất 50 ký tự';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  }, [mode, id]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    const posts = JSON.parse(localStorage.getItem("posts") || "[]");
 
-    const postData = { title: title.trim(), content: content.trim(), author: author.trim(), date, thumbnail: thumbnail.trim() || undefined, category };
-
-    if (isEdit) {
-      onSubmit({ id: Number(id), ...postData });
-      alert('Cập nhật thành công!');
-      navigate(`/posts/${id}`);
+    if (mode === "create") {
+      const newPost = {
+        id: Date.now(),
+        title,
+        author,
+        content,
+        category,
+        thumbnail,
+        date: new Date().toLocaleDateString(),
+      };
+      localStorage.setItem("posts", JSON.stringify([...posts, newPost]));
+      navigate("/");
     } else {
-      onSubmit(postData);
-      alert('Đăng bài thành công!');
-      navigate('/');
-    }
-  };
-
-  const handleCancel = () => {
-    if (isEdit) {
+      const updated = posts.map((p: any) =>
+        p.id === Number(id)
+          ? { ...p, title, author, content, category, thumbnail }
+          : p
+      );
+      localStorage.setItem("posts", JSON.stringify(updated));
       navigate(`/posts/${id}`);
-    } else {
-      navigate('/');
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">
-        {isEdit ? 'Chỉnh sửa bài viết' : 'Viết bài mới'}
-      </h1>
-
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-lg space-y-6">
+    <div style={{ padding: "20px" }}>
+      <h2>{mode === "create" ? "Tạo bài viết mới" : "Chỉnh sửa bài viết"}</h2>
+      <form onSubmit={handleSubmit}>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Tiêu đề *</label>
-          <input
-            type="text"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.title ? 'border-red-500' : 'border-gray-300'}`}
-            placeholder="Nhập tiêu đề bài viết..."
-          />
-          {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
+          <label>Tiêu đề:</label><br />
+          <input value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
-
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Tác giả *</label>
-          <input
-            type="text"
-            value={author}
-            onChange={e => setAuthor(e.target.value)}
-            className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.author ? 'border-red-500' : 'border-gray-300'}`}
-            placeholder="Tên tác giả..."
-          />
-          {errors.author && <p className="text-red-500 text-sm mt-1">{errors.author}</p>}
+          <label>Tác giả:</label><br />
+          <input value={author} onChange={(e) => setAuthor(e.target.value)} />
         </div>
-
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">URL ảnh thumbnail</label>
-          <input
-            type="url"
-            value={thumbnail}
-            onChange={e => setThumbnail(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            placeholder="https://example.com/image.jpg"
-          />
-          {thumbnail && (
-            <img
-              src={thumbnail}
-              alt="Preview"
-              className="mt-3 w-full h-48 object-cover rounded-lg shadow"
-              onError={e => (e.currentTarget.style.display = 'none')}
-            />
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Thể loại</label>
-          <select
-            value={category}
-            onChange={e => setCategory(e.target.value as Category)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          >
-            {categories.map(cat => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
+          <label>Thể loại:</label><br />
+          <select value={category} onChange={(e) => setCategory(e.target.value)}>
+            <option>Công nghệ</option>
+            <option>Du lịch</option>
+            <option>Ẩm thực</option>
+            <option>Đời sống</option>
+            <option>Khác</option>
           </select>
         </div>
-
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Nội dung bài viết *</label>
-          <textarea
-            value={content}
-            onChange={e => setContent(e.target.value)}
-            rows={12}
-            className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 resize-vertical ${errors.content ? 'border-red-500' : 'border-gray-300'}`}
-            placeholder="Viết nội dung bài viết..."
-          />
-          <p className="text-sm text-gray-500 mt-1">Độ dài: {content.length} ký tự (tối thiểu 50)</p>
-          {errors.content && <p className="text-red-500 text-sm mt-1">{errors.content}</p>}
+          <label>URL ảnh thumbnail:</label><br />
+          <input value={thumbnail} onChange={(e) => setThumbnail(e.target.value)} />
         </div>
-
-        <div className="flex justify-end space-x-3 pt-4">
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
-          >
-            Hủy
-          </button>
-          <button
-            type="submit"
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
-          >
-            {isEdit ? 'Cập nhật' : 'Đăng bài'}
-          </button>
+        <div>
+          <label>Nội dung:</label><br />
+          <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={5} />
         </div>
+        <br />
+        <button type="submit">{mode === "create" ? "Đăng bài" : "Cập nhật"}</button>
+        <button type="button" onClick={() => navigate(mode === "create" ? "/" : `/posts/${id}`)}>
+          Hủy
+        </button>
       </form>
     </div>
   );
-};
-
-export default PostForm;
+}
